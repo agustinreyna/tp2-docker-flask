@@ -119,44 +119,6 @@ Para cumplir con las consignas del tp2, implemente una app **Python + Flask** mu
 
    ![Datos persistiendo](evidencia/evidencia_uno.png)
 
-> Ejemplos de comandos útiles para generar evidencia (opcional):
->
-> ```bash
-> docker compose ps > evidencia_ps.txt
-> docker logs tp2_app_qa  --since 5m > evidencia_logs_qa.txt
-> docker logs tp2_app_prod --since 5m > evidencia_logs_prod.txt
-> ```
-
----
-
-## Problemas y soluciones
-
-* **1) Error `UndefinedTable: relation "items" does not exist` al primer `POST /items`**
-
-  * **Causa:** creación de tabla estaba en `GET /items`. Si se hacía `POST` primero, la tabla no existía.
-  * **Solución rápida:** ejecutar `GET /items` antes del primer `POST`.
-  * **Mejora sugerida:** crear la tabla en el arranque de la app.
-
-* **2) Terminal bloqueada tras `docker compose up`**
-
-  * **Causa:** se ejecutó sin `-d`; compose queda mostrando logs.
-  * **Solución:** `CTRL+C` para detener, o usar `docker compose up -d` para correr en segundo plano.
-
-* **3) `docker push` falló con `authorization failed`**
-
-  * **Causa:** no se había hecho `docker login` o el tag no tenía el namespace correcto.
-  * **Solución:** `docker login`, etiquetar como `usuario/imagen:tag` y (si aplica) crear el repo en Docker Hub.
-
-* **4) QA no respondía en `/health`**
-
-  * **Causa:** solo se recreó `app-prod` (no se levantó `app-qa`).
-  * **Solución:** `docker compose up -d app-qa` para iniciar QA también.
-
-* **5) Creación de archivos `.env` en Windows**
-
-  * **Causa:** diferencias entre CMD/PowerShell; here-strings no funcionaron en CMD.
-  * **Solución:** usar `echo ... > archivo` y `echo ... >> archivo` (compatible con CMD/PowerShell).
-
 ---
 
 ## Reproducibilidad (cómo asegurar que corre igual en cualquier máquina)
@@ -173,20 +135,3 @@ Para cumplir con las consignas del tp2, implemente una app **Python + Flask** mu
   5. Verificación: `/health` en 5001 (QA) y 5002 (PROD)
 
 ---
-
-## Anexo (fragmentos útiles)
-
-* **Servicios y puertos**:
-
-  * QA → `http://localhost:5001`
-  * PROD → `http://localhost:5002`
-  * DB → `localhost:5432` (expuesto para clientes externos si se requiere)
-* **Volumen**: `dbdata` → `/var/lib/postgresql/data` (Postgres)
-* **Imagenes Docker Hub**:
-
-  * `agustinreynaucc/tp2-flask:dev`
-  * `agustinreynaucc/tp2-flask:v1.0`
-
----
-
-> **Nota:** Las **capturas** y/o **logs** se insertarán en la sección de *Evidencia de funcionamiento* donde está indicado con *\[PONER CAPTURA]* o *\[PONER CAPTURA/LOG]*.
