@@ -1,18 +1,36 @@
 services:
-  db:
+  db-qa:
     image: postgres:14
-    container_name: tp2_db
+    container_name: tp2_db_qa
     restart: unless-stopped
     environment:
-      POSTGRES_DB: appdb
+      POSTGRES_DB: appdb_qa
       POSTGRES_USER: appuser
       POSTGRES_PASSWORD: apppass
     volumes:
-      - dbdata:/var/lib/postgresql/data
+      - dbdata-qa:/var/lib/postgresql/data
     ports:
-      - "5432:5432"   # opcional: conectar desde el host con un cliente externo
+      - "5433:5432"   # Puerto externo para QA
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb"]
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb_qa"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  db-prod:
+    image: postgres:14
+    container_name: tp2_db_prod
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: appdb_prod
+      POSTGRES_USER: appuser
+      POSTGRES_PASSWORD: apppass
+    volumes:
+      - dbdata-prod:/var/lib/postgresql/data
+    ports:
+      - "5434:5432"   # Puerto externo para PROD
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U appuser -d appdb_prod"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -23,21 +41,28 @@ services:
     restart: unless-stopped
     env_file: .env.qa
     depends_on:
-      db:
+      db-qa:
         condition: service_healthy
+    volumes:
+      - qa-data:/app/data  # Volumen específico para QA
     ports:
       - "5001:5000"   # afuera 5001 → adentro 5000
 
   app-prod:
-    image: agustinreynaucc/tp2-flask:v1.0   # MISMA IMAGEN
+    image: agustinreynaucc/tp2-flask:v1.0   # tu imagen publicada en Docker Hub
     container_name: tp2_app_prod
     restart: unless-stopped
     env_file: .env.prod
     depends_on:
-      db:
+      db-prod:
         condition: service_healthy
+    volumes:
+      - prod-data:/app/data  # Volumen específico para PROD
     ports:
-      - "5002:5000"   # PROD afuera 5002 → adentro 5000
+      - "5002:5000"   # afuera 5002 → adentro 5000
 
 volumes:
-  dbdata:
+  dbdata-qa:  # Volumen para la base de datos de QA
+  dbdata-prod:  # Volumen para la base de datos de PROD
+  qa-data:  # Volumen para los datos de QA
+  prod-data:  # Volumen para los datos de PROD

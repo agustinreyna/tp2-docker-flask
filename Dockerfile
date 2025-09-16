@@ -25,4 +25,4 @@ COPY app/ .
 EXPOSE 5000
 
 # Comando por defecto
-CMD ["python", "app.py"]
+CMD ["python", "-c", "from app import init_db; init_db(); from app import app; app.run(host='0.0.0.0', port=5000)"]

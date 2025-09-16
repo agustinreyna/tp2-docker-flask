@@ -7,12 +7,23 @@ DB_NAME = os.getenv("DB_NAME", "appdb")
 DB_USER = os.getenv("DB_USER", "appuser")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "apppass")
 
-
 def get_conn():
+    # Replace with your actual database connection details
     return psycopg2.connect(
-        host=DB_HOST,
-        port=DB_PORT,
         dbname=DB_NAME,
         user=DB_USER,
         password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
     )
+
+def init_db():
+    with get_conn() as conn:
+        with conn.cursor() as cur:
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS items (
+                    id SERIAL PRIMARY KEY,
+                    name TEXT NOT NULL
+                );
+            """)
+            conn.commit()
